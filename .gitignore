@@ -8,14 +8,18 @@ screenshots/
 *.onepkg
 
 # Extraction and review artifacts can contain PHI in filenames or content.
+work/
 output/
 outputs/
 runs/
-evidence/private/
+evidence/
+reports/private/
 manifests/
 logs/
 ocr/
 *.log
+*.manifest.json
+*.ocr.txt
 
 # Common recovered document and image formats.
 *.pdf
@@ -28,5 +32,8 @@ ocr/
 # Local scratch and environment files.
 .env
 .env.*
+.venv/
+__pycache__/
+*.py[cod]
 tmp/
 *.tmp
