@@ -25,7 +25,7 @@ def main() -> int:
     origin = report.get("input", {}).get("origin", {})
     public_input_hash = (
         report.get("input", {}).get("sha256")
-        if report.get("scope") == "tooling_harness_only" and origin.get("source_url")
+        if report.get("scope") == "public_fixture_validation" and origin.get("source_url")
         else "withheld"
     )
     expected_content = report.get("expected_content", {})
@@ -59,7 +59,7 @@ def main() -> int:
         f"- Declared expected counts: `{json.dumps(expected_content, sort_keys=True)}`",
         f"- Conversion path: `{semantic_pdf.get('path', 'not reported')}`",
         f"- Rendered PDF pass: `{semantic_pdf.get('pass', False)}`",
-        f"- Rendered PDF SHA-256: `{semantic_pdf.get('output_pdf_sha256') if report.get('scope') == 'tooling_harness_only' else 'withheld'}`",
+        f"- Rendered PDF SHA-256: `{semantic_pdf.get('output_pdf_sha256') if report.get('scope') == 'public_fixture_validation' else 'withheld'}`",
         f"- Rendered PDF expected text matches: `{sum(1 for item in semantic_pdf.get('expected_text_results', []) if item.get('native_text_match') and item.get('pdf_text_match'))}` / `{len(semantic_pdf.get('expected_text_results', []))}`",
         f"- Private output manifest entries: `{manifest_count}`",
         f"- Public fixture source: `{origin.get('source_url') or 'not reported'}`",
@@ -69,7 +69,7 @@ def main() -> int:
         "- Redaction status: `redacted_by_allowlist; manual disclosure review still required`",
         "",
         "This checkpoint intentionally omits filenames, paths, private hashes, extracted text, hierarchy titles, logs, and medical content.",
-        "A tooling-only pass does not verify the private medical fixture or baseline; the medical-migration blocker remains.",
+        "A tooling-only pass does not verify private records or Android behavior; those are separate acceptance scopes.",
         "",
     ]
     rendered = "\n".join(lines)

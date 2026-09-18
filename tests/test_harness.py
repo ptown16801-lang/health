@@ -63,6 +63,16 @@ class HarnessTests(unittest.TestCase):
         self.assertNotIn("privatehash", result.stdout)
         self.assertIn("BLOCKED_NOT_VALIDATED", result.stdout)
 
+    def test_public_fixture_download_rejects_wrong_hash(self) -> None:
+        acquisition_spec = importlib.util.spec_from_file_location(
+            "acquire_public_fixture", ROOT / "scripts/acquire_public_fixture.py"
+        )
+        assert acquisition_spec and acquisition_spec.loader
+        acquisition = importlib.util.module_from_spec(acquisition_spec)
+        acquisition_spec.loader.exec_module(acquisition)
+        with self.assertRaisesRegex(ValueError, "SHA-256 mismatch"):
+            acquisition.verified_bytes(b"not the pinned fixture")
+
     def test_baseline_rejects_unknown_distinct_row(self) -> None:
         baseline = {
             "expected_rows": [{"id": "row-a", "tokens": ["safe"]}],

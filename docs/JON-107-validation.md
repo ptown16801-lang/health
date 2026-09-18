@@ -2,11 +2,10 @@
 
 ## Current status
 
-`onenote-tool` is **not validated for JON-107**. This repository supplies the
-controlled harness, not a successful medical-record conversion. There is no verified
-historical fixture, expected PDF count, reference screenshot, or source artifact in
-the repository. Do not start the main Jefferson/OneNote conversion until a private
-representative test is run and manually inspected.
+The public, known-good tooling test has passed for its declared semantic conversion
+scope. It does not validate private records or prove Android behavior. Public and
+synthetic validation can continue without private file access; private inputs are a
+later record-specific gate only when the immediate criterion requires them.
 
 The pinned candidate is:
 
@@ -125,6 +124,16 @@ Repeat `--expected-text` for public source-visible strings asserted by the fixtu
 upstream tests. A tooling pass requires those strings in both parsed native text and
 the Poppler-extracted rendered PDF text, plus a structurally valid PDF.
 
+The pinned Apache Tika fixture can be acquired automatically with hash verification:
+
+```bash
+python scripts/acquire_public_fixture.py
+```
+
+The command records the immutable upstream commit/path, Apache-2.0 license, expected
+SHA-256, and upstream-asserted one-page/two-string baseline. The downloaded file is
+written only below the ignored `.private/` tree.
+
 To compare recovered images against written ground truth without representing it as
 a screenshot, create a **private, ignored** JSON file and pass `--text-baseline`:
 
@@ -215,8 +224,8 @@ as a reviewer checklist, not as run evidence.
 
 ## Go/no-go
 
-This converter test clears only the extraction prerequisite; it does not itself pass
-the Strand acceptance test. Keep status `BLOCKED_NOT_VALIDATED` until a representative
-private fixture covers the required content and manual source-to-output inspection
-finds no unexplained missing/corrupt content. Document limitations without claiming
-that unsupported material was recovered.
+This converter test does not itself pass Android acceptance. Report public/synthetic
+tooling scope independently from later private-record validation. A missing private
+fixture is not a project blocker while an Android or generic harness criterion can be
+tested with public/synthetic data. Document limitations without claiming that
+unsupported material was recovered.

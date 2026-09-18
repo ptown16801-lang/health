@@ -18,6 +18,11 @@ only after the corresponding private evidence packet has been reviewed.
 The [synthetic Strand pilot](docs/JON-107-strand-pilot.md) prepares the
 zero-false-merge gate without using private records.
 
+The first [Android/local-first source-browser slice](docs/JON-107-android-architecture.md)
+builds a debug APK and generates synthetic PDF/image/text sources on-device. Build
+and run its JVM tests with `./gradlew testDebugUnitTest assembleDebug` using Java 17
+and Android SDK 35. It is an implementation baseline, not a medical-data migration.
+
 Actual validation must run in access-controlled private storage. The
 private evidence packet is the source of truth; a committed redacted summary is
 only a review record and must not be sufficient to reconstruct source content.

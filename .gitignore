@@ -39,3 +39,9 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .ruff_cache/
+
+# Android/Gradle local and generated files.
+/.gradle/
+/build/
+/app/build/
+/local.properties

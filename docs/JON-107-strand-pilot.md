@@ -40,18 +40,20 @@ and source records in it are invented. The cases cover:
      /private/path/strand-review-result.json
    ```
 
-The verifier checks assertion completeness, forbidden pair coalescence, visible
-provenance attestations, undo evidence, and round-trip assertion preservation. It
-does not inspect Strand directly or replace human timeline/search review.
+The verifier requires strict booleans and unique event IDs, permits only explicitly
+reviewable same-event groups, checks exact source/version provenance, requires
+ordered merge/undo operation receipts, and compares full round-trip assertion
+content. It does not inspect an application directly or replace human
+timeline/search review.
 
 ## Go/no-go
 
-The hard gate is zero false automatic merges. Any normalized event containing a
-`must_remain_separate` pair is a no-go. A missed duplicate is acceptable for this
-gate if review remains possible. Do not proceed to private medical imports until the
-synthetic gate passes and the separate private OneNote extraction gate is cleared.
+The hard gate is zero false automatic merges. Any grouping not explicitly declared
+reviewable is a no-go. A missed duplicate is acceptable for this gate if review
+remains possible. Do not proceed to private medical imports until the synthetic
+Android gate passes. Private OneNote validation is a separate record-specific check;
+it does not block generic Android work.
 
 Record unresolved manual items using
 [the acquisition queue template](../templates/manual-acquisition-queue.csv), keeping
 the populated file in private storage because real filenames/dates can be PHI.
-
