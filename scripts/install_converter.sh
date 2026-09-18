@@ -30,13 +30,16 @@ if ! "$python_bin" -m venv "$venv_dir"; then
   echo "Python venv support is required. Install the repository-pinned Python with mise or provide PYTHON_BIN." >&2
   exit 1
 fi
-"$venv_dir/bin/python" -m pip install --disable-pip-version-check "$source_dir[cli]"
+"$venv_dir/bin/python" -m pip install --disable-pip-version-check "$source_dir[cli]" "weasyprint==66.0"
 
 installed_version=$(
   "$venv_dir/bin/python" -c 'import importlib.metadata; print(importlib.metadata.version("onenote-tool"))'
 )
 parser_version=$(
   "$venv_dir/bin/python" -c 'import importlib.metadata; print(importlib.metadata.version("pyOneNote"))'
+)
+renderer_version=$(
+  "$venv_dir/bin/python" -c 'import importlib.metadata; print(importlib.metadata.version("weasyprint"))'
 )
 if [[ "$installed_version" != "0.1.5" ]]; then
   echo "Refusing installation: expected onenote-tool 0.1.5, got $installed_version" >&2
@@ -46,5 +49,9 @@ if [[ "$parser_version" != "0.0.2" ]]; then
   echo "Refusing installation: expected pyOneNote 0.0.2, got $parser_version" >&2
   exit 1
 fi
+if [[ "$renderer_version" != "66.0" ]]; then
+  echo "Refusing installation: expected weasyprint 66.0, got $renderer_version" >&2
+  exit 1
+fi
 
-echo "Installed onenote-tool $installed_version with pyOneNote $parser_version from verified commit $actual_commit in $venv_dir"
+echo "Installed onenote-tool $installed_version with pyOneNote $parser_version and WeasyPrint $renderer_version from verified commit $actual_commit in $venv_dir"

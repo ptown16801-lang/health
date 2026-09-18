@@ -6,3 +6,4 @@ commit=abd2065c28a2dcfd45edcc944d8be078c313dd02
 install_method=pip install of a locally cloned, detached, commit-verified source tree with the cli extra
 pypi_wheel_sha256=30735e5549b92e223e14d61d6a0c7e6168627575decb70a5cefd51b5e5c570be
 parser_dependency=pyOneNote==0.0.2
+semantic_pdf_renderer=weasyprint==66.0
