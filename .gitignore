@@ -30,3 +30,9 @@ ocr/
 .env.*
 tmp/
 *.tmp
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+import-output/
