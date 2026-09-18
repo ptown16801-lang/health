@@ -1,0 +1,3 @@
+# Direct dependencies used by the validation harness.
+onenote-tool[cli]==0.1.5
+pypdf==6.19.0

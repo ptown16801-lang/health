@@ -1,0 +1,16 @@
+# Fully pinned Python 3.12 resolution for requirements.in, resolved 2026-09-18.
+# Regenerate deliberately and re-audit licenses before changing any pin.
+annotated-doc==0.0.5
+cffi==2.1.1
+cryptography==50.0.1
+markdown-it-py==4.2.0
+mdurl==0.1.2
+onenote-tool==0.1.5
+pillow==12.3.0
+pycparser==3.0
+pygments==2.21.0
+pyonenote==0.0.2
+pypdf==6.19.0
+rich==15.0.0
+shellingham==1.5.4
+typer==0.27.2
