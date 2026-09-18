@@ -164,6 +164,60 @@ def normalize(value: str) -> str:
     return "".join(character.lower() for character in value if character.isalnum())
 
 
+def validate_text_baseline(baseline: dict) -> None:
+    expected_images = baseline.get("expected_image_count")
+    if expected_images is not None and (
+        not isinstance(expected_images, int) or isinstance(expected_images, bool) or expected_images < 0
+    ):
+        raise ValueError("expected_image_count must be a non-negative integer")
+
+    rows = baseline.get("expected_rows", [])
+    if not isinstance(rows, list):
+        raise ValueError("expected_rows must be a list")
+    row_ids = []
+    for row in rows:
+        if not isinstance(row, dict) or not isinstance(row.get("id"), str) or not row["id"].strip():
+            raise ValueError("every expected row must have a non-empty string id")
+        tokens = row.get("tokens")
+        if not isinstance(tokens, list) or not tokens or any(
+            not isinstance(token, str) or not normalize(token) for token in tokens
+        ):
+            raise ValueError("every expected row must have one or more non-empty string tokens")
+        row_ids.append(row["id"])
+    if len(row_ids) != len(set(row_ids)):
+        raise ValueError("expected row ids must be unique")
+
+    known_ids = set(row_ids)
+    groups = baseline.get("must_remain_distinct", [])
+    if not isinstance(groups, list):
+        raise ValueError("must_remain_distinct must be a list of row-id lists")
+    for group in groups:
+        if not isinstance(group, list) or len(group) < 2 or any(item not in known_ids for item in group):
+            raise ValueError("each must_remain_distinct group needs at least two known row ids")
+        if len(group) != len(set(group)):
+            raise ValueError("must_remain_distinct groups cannot repeat a row id")
+
+
+def maximum_nonoverlapping_matches(
+    row_candidates: dict[str, list[tuple[int, int, int]]], row_ids: list[str]
+) -> int:
+    """Return how many rows can occupy distinct, non-overlapping OCR windows."""
+
+    ordered = sorted(row_ids, key=lambda row_id: len(row_candidates.get(row_id, [])))
+
+    def search(index: int, occupied: set[tuple[int, int]], matched: int) -> int:
+        if index == len(ordered):
+            return matched
+        best = search(index + 1, occupied, matched)
+        for image_index, line_index, span in row_candidates.get(ordered[index], []):
+            window = {(image_index, offset) for offset in range(line_index, line_index + span)}
+            if occupied.isdisjoint(window):
+                best = max(best, search(index + 1, occupied | window, matched + 1))
+        return best
+
+    return search(0, set(), 0)
+
+
 def compare_text_baseline(extracted: Path, baseline: dict, comparison_dir: Path) -> dict:
     comparison_dir.mkdir()
     image_paths = []
@@ -171,7 +225,7 @@ def compare_text_baseline(extracted: Path, baseline: dict, comparison_dir: Path)
         if path.is_file() and path.suffix.lower() in {".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp"}:
             image_paths.append(path)
     ocr_records = []
-    combined_lines = []
+    lines_by_image = []
     for index, image_path in enumerate(image_paths, 1):
         stdout_path = comparison_dir / f"image-{index:04d}.ocr.txt"
         stderr_path = comparison_dir / f"image-{index:04d}.stderr.log"
@@ -180,18 +234,56 @@ def compare_text_baseline(extracted: Path, baseline: dict, comparison_dir: Path)
             block_network=True,
         )
         lines = stdout_path.read_text(encoding="utf-8", errors="replace").splitlines()
-        combined_lines.extend(lines)
+        lines_by_image.append(lines)
         ocr_records.append({"image_index": index, "exit_status": exit_status, "text_characters": sum(map(len, lines))})
 
-    windows = []
-    for index in range(len(combined_lines)):
-        windows.append(normalize(" ".join(combined_lines[index:index + 3])))
+    lines = [
+        {
+            "image_index": image_index,
+            "line_index": line_index,
+            "normalized_text": normalize(line),
+        }
+        for image_index, image_lines in enumerate(lines_by_image, 1)
+        for line_index, line in enumerate(image_lines)
+    ]
+    windows = [
+        {
+            "image_index": image_index,
+            "line_index": line_index,
+            "normalized_text": normalize(" ".join(lines[line_index:line_index + 3])),
+        }
+        for image_index, lines in enumerate(lines_by_image, 1)
+        for line_index in range(len(lines))
+    ]
     row_results = []
+    row_candidates = {}
     for expected in baseline.get("expected_rows", []):
-        tokens = [normalize(str(token)) for token in expected.get("tokens", [])]
+        tokens = [normalize(token) for token in expected["tokens"]]
+        candidates = [
+            (line["image_index"], line["line_index"], 1)
+            for line in lines
+            if all(token in line["normalized_text"] for token in tokens)
+        ]
+        if not candidates:
+            candidates = [
+                (window["image_index"], window["line_index"], 3)
+                for window in windows
+                if all(token in window["normalized_text"] for token in tokens)
+            ]
+        row_candidates[expected["id"]] = candidates
         row_results.append({
-            "id": expected.get("id", "unnamed-row"),
-            "matched_in_single_three-line_window": bool(tokens) and any(all(token in window for token in tokens) for window in windows),
+            "id": expected["id"],
+            "matched_in_single_three_line_window": bool(candidates),
+            "candidate_window_count": len(candidates),
+        })
+    distinct_results = []
+    for group in baseline.get("must_remain_distinct", []):
+        matched = maximum_nonoverlapping_matches(row_candidates, group)
+        distinct_results.append({
+            "row_ids": group,
+            "required_distinct_rows": len(group),
+            "observed_distinct_nonoverlapping_rows": matched,
+            "pass": matched == len(group),
         })
     expected_images = baseline.get("expected_image_count")
     return {
@@ -202,7 +294,9 @@ def compare_text_baseline(extracted: Path, baseline: dict, comparison_dir: Path)
         "ocr_engine": "tesseract",
         "ocr_records": ocr_records,
         "expected_rows": row_results,
-        "all_expected_rows_matched": bool(row_results) and all(item["matched_in_single_three-line_window"] for item in row_results),
+        "all_expected_rows_matched": bool(row_results) and all(item["matched_in_single_three_line_window"] for item in row_results),
+        "must_remain_distinct": distinct_results,
+        "all_distinctness_requirements_met": all(item["pass"] for item in distinct_results),
         "interpretation": "OCR is comparison evidence only; extracted image bytes remain the source.",
     }
 
@@ -432,6 +526,10 @@ def main() -> int:
         baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
         if not isinstance(baseline, dict):
             parser.error("--text-baseline root must be a JSON object")
+        try:
+            validate_text_baseline(baseline)
+        except ValueError as exc:
+            parser.error(f"invalid --text-baseline: {exc}")
         if not reference_dir.exists():
             reference_dir.mkdir(mode=0o700)
         shutil.copy2(baseline_path, reference_dir / "written-text-baseline.json")
@@ -487,6 +585,8 @@ def main() -> int:
         findings.append({"severity": "error", "message": "Observed image count does not match the private written baseline."})
     if baseline_comparison and not baseline_comparison["all_expected_rows_matched"]:
         findings.append({"severity": "warning", "message": "OCR comparison did not match every written-baseline row; manual image review is required."})
+    if baseline_comparison and not baseline_comparison["all_distinctness_requirements_met"]:
+        findings.append({"severity": "error", "message": "OCR evidence did not preserve every written-baseline row declared as distinct; private manual review is required."})
     expectation_results = {
         category: {"expected": expected, "observed": content["totals"].get(category, 0), "matches": content["totals"].get(category, 0) == expected}
         for category, expected in expectations.items()

@@ -63,6 +63,22 @@ class HarnessTests(unittest.TestCase):
         self.assertNotIn("privatehash", result.stdout)
         self.assertIn("BLOCKED_NOT_VALIDATED", result.stdout)
 
+    def test_baseline_rejects_unknown_distinct_row(self) -> None:
+        baseline = {
+            "expected_rows": [{"id": "row-a", "tokens": ["safe"]}],
+            "must_remain_distinct": [["row-a", "row-missing"]],
+        }
+        with self.assertRaisesRegex(ValueError, "known row ids"):
+            HARNESS.validate_text_baseline(baseline)
+
+    def test_distinct_rows_cannot_share_an_ocr_window(self) -> None:
+        candidates = {"row-a": [(1, 4, 1)], "row-b": [(1, 4, 1)]}
+        self.assertEqual(HARNESS.maximum_nonoverlapping_matches(candidates, ["row-a", "row-b"]), 1)
+
+    def test_distinct_rows_pass_in_separate_ocr_windows(self) -> None:
+        candidates = {"row-a": [(1, 4, 1)], "row-b": [(1, 5, 1)]}
+        self.assertEqual(HARNESS.maximum_nonoverlapping_matches(candidates, ["row-a", "row-b"]), 2)
+
 
 if __name__ == "__main__":
     unittest.main()
