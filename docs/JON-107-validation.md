@@ -13,6 +13,7 @@ The pinned candidate is:
 - package: `onenote-tool==0.1.5`
 - parser dependency: `pyOneNote==0.0.2` (the converter itself requires this
   exact private-internals-compatible version)
+- semantic PDF renderer: `weasyprint==66.0`
 - repository: `https://github.com/vanarebane/onenote-tool.git`
 - commit/tag: `abd2065c28a2dcfd45edcc944d8be078c313dd02` / `0.1.5`
 - installation: `pip install` from a locally cloned, detached, commit-verified source
@@ -76,6 +77,11 @@ The harness records `doctor` separately, then uses the same pinned package APIs 
 subprocess because the stock inspection CLI does not write recovered attachment
 bytes needed for integrity evidence.
 
+`onenote-tool` does not natively emit PDF. The harness explicitly builds a semantic
+inspection HTML document from its parsed sections/pages/blocks, renders that HTML
+with pinned WeasyPrint, and verifies the resulting PDF with Poppler. This is a lossy
+semantic conversion for content inspection, not a claim of faithful OneNote layout.
+
 Place exactly one smallest representative fixture at a time in
 `.private/fixtures/`. Prefer a synthetic fixture first for operational smoke testing,
 then a privately reviewed representative fixture covering hierarchy, native text,
@@ -98,6 +104,26 @@ For a single `.one` section, omit `--reference` if no private screenshot exists:
 .private/tools/venv/bin/python scripts/validate_onenote.py \
   .private/fixtures/representative.one
 ```
+
+For an authorized public/non-medical tooling smoke test, record its immutable source
+and license:
+
+```bash
+.private/tools/venv/bin/python scripts/validate_onenote.py \
+  .private/fixtures/public-test.one \
+  --fixture-source-url https://example.invalid/repository/blob/COMMIT/public-test.one \
+  --fixture-license Apache-2.0 \
+  --expected-count pages=1 \
+  --expected-text 'public known-good text'
+```
+
+Such a run is labeled `tooling_harness_only`. It cannot verify a private fixture,
+private written baseline, or clear the medical-migration converter block.
+Repeat `--expected-count` for non-sensitive upstream-declared expectations among
+`sections`, `pages`, `images`, `attachments`, and `tables`.
+Repeat `--expected-text` for public source-visible strings asserted by the fixture's
+upstream tests. A tooling pass requires those strings in both parsed native text and
+the Poppler-extracted rendered PDF text, plus a structurally valid PDF.
 
 To compare recovered images against written ground truth without representing it as
 a screenshot, create a **private, ignored** JSON file and pass `--text-baseline`:

@@ -107,6 +107,7 @@ def main() -> int:
             kinds = [block.get("kind", "unknown") for block in page.blocks]
             section_record["pages"].append({
                 "title": page.title,
+                "content_path": str((page_dir / "content.html").relative_to(args.output)),
                 "sub_level": page.sub_level,
                 "created_at": page.created_at.isoformat() if page.created_at else None,
                 "block_kinds": kinds,

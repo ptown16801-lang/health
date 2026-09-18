@@ -17,6 +17,15 @@ SPEC.loader.exec_module(HARNESS)
 
 
 class HarnessTests(unittest.TestCase):
+    def test_venv_executable_path_is_not_symlink_resolved(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            base = root / "base-python"
+            base.touch()
+            venv = root / "venv-python"
+            venv.symlink_to(base)
+            self.assertNotEqual(Path(str(venv.absolute())), venv.resolve())
+
     def test_manifest_records_relative_path_size_and_hash(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             root = Path(raw)
@@ -30,14 +39,16 @@ class HarnessTests(unittest.TestCase):
     def test_redactor_excludes_sensitive_fields(self) -> None:
         private = {
             "run": {"test_id": "JON-107-onenote-extraction"},
+            "scope": "private_fixture_validation",
             "assessment": {"status": "BLOCKED_NOT_VALIDATED", "findings": [{"severity": "required", "message": "secret medical text"}]},
             "converter": {"package": "onenote-tool", "version": "0.1.5", "commit": HARNESS.COMMIT},
+            "tool_versions": {"python": "3.x"},
             "execution": {"exit_status": 0, "command": ["secret-filename.one"], "command_sha256": "safe-command-digest"},
             "references": {"count": 0, "comparison_status": "not_applicable_no_references"},
             "content": {"totals": {"sections": 1, "pages": 2, "images": 3, "attachments": 4, "tables": 5}},
             "pdf_inspection": [],
             "duplicates": [],
-            "input": {"original_filename": "secret-filename.one", "sha256": "privatehash"},
+            "input": {"original_filename": "secret-filename.one", "sha256": "privatehash", "origin": {"source_url": None, "license": None}},
         }
         with tempfile.TemporaryDirectory() as raw:
             source = Path(raw) / "report.json"
