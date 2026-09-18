@@ -1,6 +1,7 @@
 # Private source material. Never commit real validation fixtures.
 private/
-fixtures/
+fixtures/*
+!fixtures/*.synthetic.json
 inputs/
 references/
 screenshots/
@@ -30,3 +31,5 @@ ocr/
 .env.*
 tmp/
 *.tmp
+__pycache__/
+*.py[cod]
