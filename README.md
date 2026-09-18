@@ -32,6 +32,11 @@ The [OneNote ingestion workflow](docs/onenote-ingestion.md) packages recovered
 native text, images, and original embedded documents for local Android import
 while retaining source provenance and limiting OCR to image-based content.
 
-Actual validation must run in access-controlled private storage. The
+The [record normalization contract](docs/record-normalization.md) defines the
+conservative, provenance-preserving boundary for future source importers. Its
+controlled synthetic repeat-lab fixture covers exact-file duplicates, same-day
+repeats, conflicts, misleading lookalikes, and reversible manual merges.
+
+Actual validation must run in access-controlled local or private storage. The
 private evidence packet is the source of truth; a committed redacted summary is
 only a review record and must not be sufficient to reconstruct source content.

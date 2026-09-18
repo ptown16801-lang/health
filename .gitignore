@@ -4,6 +4,7 @@ private/
 inputs/
 fixtures/*
 !fixtures/README.md
+!fixtures/*.synthetic.json
 references/*
 !references/README.md
 screenshots/
