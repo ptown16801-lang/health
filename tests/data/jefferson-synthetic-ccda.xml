@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Entirely synthetic. No person represented by this fixture exists. -->
+<ClinicalDocument xmlns="urn:hl7-org:v3">
+  <id root="2.16.840.1.113883.19.5" extension="SYNTHETIC-DOC-1"/>
+  <title>Synthetic Patient Summary</title>
+  <effectiveTime value="20260918000000+0000"/>
+  <component>
+    <structuredBody>
+      <component>
+        <section>
+          <code code="10160-0" codeSystem="2.16.840.1.113883.6.1"/>
+          <title>History of medication use</title>
+          <text><paragraph>No synthetic medications recorded.</paragraph></text>
+        </section>
+      </component>
+      <component>
+        <section>
+          <code code="11450-4" codeSystem="2.16.840.1.113883.6.1"/>
+          <title>Problem list</title>
+          <text><paragraph>No synthetic problems recorded.</paragraph></text>
+        </section>
+      </component>
+    </structuredBody>
+  </component>
+</ClinicalDocument>

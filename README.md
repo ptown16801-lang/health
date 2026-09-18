@@ -1,7 +1,7 @@
-# OneNote validation evidence and harness
+# Medical record ingestion and validation
 
-This repository contains non-sensitive tooling and documentation for controlled
-OneNote extraction validation. It must not contain real medical records, clinical
+This repository contains non-sensitive ingestion tooling and documentation for
+controlled source validation. It must not contain real medical records or clinical
 content, identifying information, private screenshots, extracted documents, OCR
 text, unredacted manifests, or execution logs.
 
@@ -11,8 +11,13 @@ recovered PDFs without OCR, detects byte-identical outputs, and produces a priva
 evidence report. The converter remains unverified until the controlled private test
 and manual comparison are completed.
 
-Start with the [harness instructions](docs/JON-107-validation.md) and the
-[review checklist](docs/onenote-validation-review.md). Copy the
+For a Jefferson C-CDA or ZIP export, see the
+[Jefferson ingestion guide](docs/jefferson-ingestion.md). The importer is tested
+with a synthetic, non-PHI fixture and keeps exact source bytes separate from
+normalized document and section records.
+
+For OneNote, start with the [harness instructions](docs/JON-107-validation.md) and
+the [review checklist](docs/onenote-validation-review.md). Copy the
 [redacted evidence template](templates/onenote-validation-evidence.redacted.md)
 only after the corresponding private evidence packet has been reviewed.
 The [synthetic Strand pilot](docs/JON-107-strand-pilot.md) prepares the
