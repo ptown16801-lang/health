@@ -23,6 +23,10 @@ builds a debug APK and generates synthetic PDF/image/text sources on-device. Bui
 and run its JVM tests with `./gradlew testDebugUnitTest assembleDebug` using Java 17
 and Android SDK 35. It is an implementation baseline, not a medical-data migration.
 
+The [OneNote ingestion workflow](docs/onenote-ingestion.md) packages recovered
+native text, images, and original embedded documents for local Android import
+while retaining source provenance and limiting OCR to image-based content.
+
 Actual validation must run in access-controlled private storage. The
 private evidence packet is the source of truth; a committed redacted summary is
 only a review record and must not be sufficient to reconstruct source content.

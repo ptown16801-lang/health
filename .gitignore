@@ -29,6 +29,10 @@ ocr/
 *.tif
 *.tiff
 
+# Public synthetic ingestion fixtures are explicitly safe to commit.
+!fixtures/onenote-derived-synthetic/
+!fixtures/onenote-derived-synthetic/**
+
 # Local scratch, environment, and Python files.
 .env
 .env.*

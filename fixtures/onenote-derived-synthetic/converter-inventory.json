@@ -1,0 +1,46 @@
+{
+  "notebook_name": "Synthetic Health Notebook",
+  "converted_elements": 4,
+  "failed_elements": 0,
+  "sections": [
+    {
+      "name": "Public examples",
+      "group_path": ["Synthetic"],
+      "pages": [
+        {
+          "title": "Example page",
+          "created_at": "2026-01-01T00:00:00+00:00",
+          "native_text_path": "page/native-text.txt",
+          "images": [
+            {
+              "path": "page/diagram.pgm",
+              "source_filename": "diagram.pgm",
+              "size": 17,
+              "sha256": "29f6a1ca59a8ff644dc66ce3f9b77abd50d6245fedebb35cdf18b5448547051b"
+            }
+          ],
+          "attachments": [
+            {
+              "path": "page/reference.txt",
+              "source_filename": "reference.txt",
+              "size": 37,
+              "sha256": "d852297cc361c116e13b8fceb258335fcedd25a4bce67cd570298cb862f41826"
+            },
+            {
+              "path": "page/searchable.pdf",
+              "source_filename": "searchable.pdf",
+              "size": 599,
+              "sha256": "65ea1189a92fe00ee9428d4ad4848c8773d80943dcec1d484904432867e53c24"
+            },
+            {
+              "path": "page/image-only.pdf",
+              "source_filename": "image-only.pdf",
+              "size": 648,
+              "sha256": "31068e677a8fbe511d283ec0e7e98e18fa275cc19b9c395b10a67c4c8a6e3d75"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

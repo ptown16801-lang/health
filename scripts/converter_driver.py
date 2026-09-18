@@ -108,6 +108,7 @@ def main() -> int:
             section_record["pages"].append({
                 "title": page.title,
                 "content_path": str((page_dir / "content.html").relative_to(args.output)),
+                "native_text_path": str((page_dir / "native-text.txt").relative_to(args.output)),
                 "sub_level": page.sub_level,
                 "created_at": page.created_at.isoformat() if page.created_at else None,
                 "block_kinds": kinds,
