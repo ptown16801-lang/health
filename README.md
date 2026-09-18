@@ -37,6 +37,11 @@ conservative, provenance-preserving boundary for future source importers. Its
 controlled synthetic repeat-lab fixture covers exact-file duplicates, same-day
 repeats, conflicts, misleading lookalikes, and reversible manual merges.
 
+The [controlled Android acceptance gate](docs/android-acceptance.md) runs the
+integrated candidate across both ingestion paths, the zero-false-merge fixture,
+cross-source search and timeline projections, and an integrity-checked export
+and re-import.
+
 Actual validation must run in access-controlled local or private storage. The
 private evidence packet is the source of truth; a committed redacted summary is
 only a review record and must not be sufficient to reconstruct source content.
