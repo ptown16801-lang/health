@@ -1,0 +1,32 @@
+# Private source material. Never commit real validation fixtures.
+private/
+fixtures/
+inputs/
+references/
+screenshots/
+*.one
+*.onepkg
+
+# Extraction and review artifacts can contain PHI in filenames or content.
+output/
+outputs/
+runs/
+evidence/private/
+manifests/
+logs/
+ocr/
+*.log
+
+# Common recovered document and image formats.
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.tif
+*.tiff
+
+# Local scratch and environment files.
+.env
+.env.*
+tmp/
+*.tmp
