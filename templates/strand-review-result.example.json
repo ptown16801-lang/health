@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "workspace_is_synthetic_only": true,
+  "events": [
+    {"id": "E1", "source_assertion_ids": ["A1", "A2"], "provenance_visible": true},
+    {"id": "E2", "source_assertion_ids": ["A3"], "provenance_visible": true},
+    {"id": "E3", "source_assertion_ids": ["A4"], "provenance_visible": true},
+    {"id": "E4", "source_assertion_ids": ["A5"], "provenance_visible": true},
+    {"id": "E5", "source_assertion_ids": ["A6"], "provenance_visible": true},
+    {"id": "E6", "source_assertion_ids": ["A7"], "provenance_visible": true}
+  ],
+  "incorrect_merge_undo": {"pair": ["A3", "A7"], "merge_attempted": true, "undo_succeeded": true},
+  "round_trip": {"reimported_assertion_ids": ["A1", "A2", "A3", "A4", "A5", "A6", "A7"]},
+  "manual_review": {"timeline_usable": true, "search_usable": true, "export_inspected": true}
+}
+

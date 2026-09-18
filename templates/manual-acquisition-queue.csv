@@ -1,0 +1,3 @@
+source_portal,item_needed,date_or_range,reason,preferred_format,report_sufficient,imaging_or_dicom_needed,status
+SYNTHETIC-EXAMPLE,Example report,2030-01-01,Acceptance-test placeholder,PDF,yes,no,needed
+
