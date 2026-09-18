@@ -21,6 +21,7 @@ def main() -> int:
         severity = finding.get("severity", "unknown")
         severities[severity] = severities.get(severity, 0) + 1
     baseline = report.get("written_baseline_comparison") or {}
+    distinct_results = baseline.get("must_remain_distinct", [])
     origin = report.get("input", {}).get("origin", {})
     public_input_hash = (
         report.get("input", {}).get("sha256")
@@ -53,6 +54,7 @@ def main() -> int:
         f"- Written baseline used (not screenshots): `{bool(baseline)}`",
         f"- Expected/observed images: `{baseline.get('expected_image_count', 'not reported')}` / `{baseline.get('observed_image_count', 'not reported')}`",
         f"- Written-baseline rows matched: `{sum(1 for row in baseline.get('expected_rows', []) if row.get('matched_in_single_three_line_window'))}` / `{len(baseline.get('expected_rows', []))}`",
+        f"- Distinct-row requirements met: `{sum(1 for item in distinct_results if item.get('pass'))}` / `{len(distinct_results)}`",
         f"- Finding counts by severity: `{json.dumps(severities, sort_keys=True)}`",
         f"- Declared expected counts: `{json.dumps(expected_content, sort_keys=True)}`",
         f"- Conversion path: `{semantic_pdf.get('path', 'not reported')}`",

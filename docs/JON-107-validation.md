@@ -132,8 +132,10 @@ a screenshot, create a **private, ignored** JSON file and pass `--text-baseline`
 {
   "expected_image_count": 2,
   "expected_rows": [
-    {"id": "private-row-label", "tokens": ["private", "expected", "tokens"]}
-  ]
+    {"id": "private-row-a", "tokens": ["private", "expected", "tokens-a"]},
+    {"id": "private-row-b", "tokens": ["private", "expected", "tokens-b"]}
+  ],
+  "must_remain_distinct": [["private-row-a", "private-row-b"]]
 }
 ```
 
@@ -144,7 +146,9 @@ a screenshot, create a **private, ignored** JSON file and pass `--text-baseline`
 ```
 
 That option runs local Tesseract as comparison evidence and keeps its OCR text only
-inside the private run. OCR mismatch requires manual review; it does not alter the
+inside the private run. Each `must_remain_distinct` group requires the named rows to
+match separate, non-overlapping OCR regions; one region cannot satisfy multiple
+same-day observations. OCR mismatch requires manual review; it does not alter the
 raw extracted image or prove the source is wrong.
 
 Each invocation creates a unique mode-`0700` directory under `.private/runs/` and
