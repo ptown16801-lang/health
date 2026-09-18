@@ -18,6 +18,10 @@ only after the corresponding private evidence packet has been reviewed.
 The [synthetic Strand pilot](docs/JON-107-strand-pilot.md) prepares the
 zero-false-merge gate without using private records.
 
+The [OneNote ingestion workflow](docs/onenote-ingestion.md) packages recovered
+native text, images, and original embedded documents for local Android import
+while retaining source provenance and limiting OCR to image-based content.
+
 Actual validation must run in access-controlled private storage. The
 private evidence packet is the source of truth; a committed redacted summary is
 only a review record and must not be sufficient to reconstruct source content.
