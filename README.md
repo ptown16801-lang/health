@@ -15,6 +15,8 @@ Start with the [harness instructions](docs/JON-107-validation.md) and the
 [review checklist](docs/onenote-validation-review.md). Copy the
 [redacted evidence template](templates/onenote-validation-evidence.redacted.md)
 only after the corresponding private evidence packet has been reviewed.
+The [synthetic Strand pilot](docs/JON-107-strand-pilot.md) prepares the
+zero-false-merge gate without using private records.
 
 Actual validation must run in access-controlled private storage. The
 private evidence packet is the source of truth; a committed redacted summary is

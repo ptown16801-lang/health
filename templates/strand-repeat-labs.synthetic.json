@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "classification": "synthetic_non_phi",
+  "patient": "SYNTHETIC-PATIENT-001",
+  "assertions": [
+    {"id": "A1", "source": "source-alpha-structured", "analyte": "potassium", "value": 4.1, "unit": "mmol/L", "collected_at": "2030-01-15T08:00:00Z", "specimen": "serum", "panel": "BMP", "accession": "ALPHA-001"},
+    {"id": "A2", "source": "source-beta-document", "analyte": "potassium", "value": 4.1, "unit": "mmol/L", "collected_at": "2030-01-15T08:00:00Z", "specimen": "serum", "panel": "BMP", "accession": "ALPHA-001"},
+    {"id": "A3", "source": "source-alpha-structured", "analyte": "potassium", "value": 4.8, "unit": "mmol/L", "collected_at": "2030-01-15T16:00:00Z", "specimen": "serum", "panel": "BMP", "accession": "ALPHA-002"},
+    {"id": "A4", "source": "source-alpha-structured", "analyte": "potassium", "value": 4.1, "unit": "mmol/L", "collected_at": "2030-01-15T16:30:00Z", "specimen": "plasma", "panel": "BMP", "accession": "ALPHA-003"},
+    {"id": "A5", "source": "source-alpha-structured", "analyte": "potassium", "value": 4.1, "unit": "mmol/L", "collected_at": "2030-01-15T08:00:00Z", "specimen": "serum", "panel": "CMP", "accession": "ALPHA-004"},
+    {"id": "A6", "source": "source-alpha-structured", "analyte": "potassium", "value": 4.1, "unit": "mmol/L", "collected_at": "2030-01-15T12:00:00Z", "specimen": "serum", "panel": "BMP", "accession": "ALPHA-005"},
+    {"id": "A7", "source": "source-beta-ocr", "analyte": "potassium", "value": 4.7, "unit": "mmol/L", "collected_at": "2030-01-15T16:00:00Z", "specimen": "serum", "panel": "BMP", "accession": "ALPHA-002"}
+  ],
+  "reviewable_same_event": [["A1", "A2"]],
+  "must_remain_separate": [
+    ["A1", "A3"], ["A1", "A4"], ["A1", "A5"], ["A1", "A6"],
+    ["A2", "A3"], ["A3", "A4"], ["A3", "A6"], ["A3", "A7"]
+  ],
+  "intentional_incorrect_merge_pair": ["A3", "A7"]
+}
+
