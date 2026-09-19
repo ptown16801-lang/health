@@ -17,7 +17,9 @@ import android.widget.TextView;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 
 public final class SourceViewerActivity extends Activity {
     private PdfRenderer renderer;
@@ -51,7 +53,9 @@ public final class SourceViewerActivity extends Activity {
             else showText(root, file);
         } catch (IOException | RuntimeException error) {
             TextView failure = new TextView(this);
-            failure.setText("Corrupt or unreadable source. Original preserved.\n" + error.getClass().getSimpleName());
+            failure.setContentDescription("Source viewer error");
+            failure.setText("Unable to render this source. Original preserved.\n"
+                    + error.getClass().getSimpleName() + ": " + error.getMessage());
             root.addView(failure);
         }
         setContentView(root);
@@ -71,6 +75,7 @@ public final class SourceViewerActivity extends Activity {
         pageLabel.setContentDescription("PDF page status");
         root.addView(pageLabel);
         image = new ImageView(this);
+        image.setContentDescription("Rendered PDF page");
         image.setAdjustViewBounds(true);
         image.setScaleType(ImageView.ScaleType.FIT_CENTER);
         ScrollView scroll = new ScrollView(this);
@@ -101,17 +106,30 @@ public final class SourceViewerActivity extends Activity {
         }
     }
 
-    private void showImage(LinearLayout root, File file) {
+    private void showImage(LinearLayout root, File file) throws IOException {
         image = new ImageView(this);
         image.setAdjustViewBounds(true);
         image.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        image.setImageBitmap(BitmapFactory.decodeFile(file.getAbsolutePath()));
+        Bitmap bitmap = decodeImage(file);
+        if (bitmap == null) throw new IOException("Image decoder returned no bitmap");
+        image.setImageBitmap(bitmap);
+        image.setContentDescription("Rendered source image");
         root.addView(image, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
     }
 
+    private static Bitmap decodeImage(File file) throws IOException {
+        Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+        if (bitmap != null) return bitmap;
+        if (!file.getName().toLowerCase(Locale.ROOT).endsWith(".pgm")) return null;
+        PgmDecoder.Pixels pixels = PgmDecoder.decode(Files.readAllBytes(file.toPath()));
+        return Bitmap.createBitmap(
+                pixels.argb(), pixels.width(), pixels.height(), Bitmap.Config.ARGB_8888);
+    }
+
     private void showText(LinearLayout root, File file) throws IOException {
         TextView text = new TextView(this);
+        text.setContentDescription("Rendered source text");
         try (FileInputStream input = new FileInputStream(file)) {
             byte[] content = new byte[(int) file.length()];
             int read = input.read(content);
