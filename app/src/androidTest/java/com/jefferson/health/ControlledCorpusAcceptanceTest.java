@@ -15,11 +15,13 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import android.support.test.InstrumentationRegistry;
-import android.support.test.rule.ActivityTestRule;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.rule.ActivityTestRule;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.Rule;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -35,6 +37,23 @@ public final class ControlledCorpusAcceptanceTest {
     @Rule
     public final ActivityTestRule<MainActivity> activity =
             new ActivityTestRule<>(MainActivity.class);
+
+    @Before
+    public void enableAcceptanceControls() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            TestSettings settings = new TestSettings(activity.getActivity());
+            settings.turnAllOff();
+            find(activity.getActivity().getWindow().getDecorView(), android.widget.Switch.class,
+                    TestSettings.Control.SHOW_DETAILS.label).setChecked(true);
+            find(activity.getActivity().getWindow().getDecorView(), android.widget.Switch.class,
+                    TestSettings.Control.ALLOW_VALIDATION.label).setChecked(true);
+        });
+    }
+
+    @After
+    public void resetControls() {
+        new TestSettings(activity.getActivity()).turnAllOff();
+    }
 
     @Test
     public void opensOneNotePdfAndProvesPageRendered() {

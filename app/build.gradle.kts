@@ -13,8 +13,10 @@ android {
         versionCode = 1
         versionName = "0.1.0"
 
-        testInstrumentationRunner = "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+
+    testOptions.unitTests.isIncludeAndroidResources = true
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -41,6 +43,8 @@ tasks.named("preBuild").configure { dependsOn(generateControlledCorpus) }
 
 dependencies {
     testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("com.android.support.test:runner:1.0.2")
-    androidTestImplementation("com.android.support.test:rules:1.0.2")
+    testImplementation("org.robolectric:robolectric:4.14.1")
+    androidTestImplementation("androidx.test:runner:1.6.2")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test:rules:1.6.1")
 }

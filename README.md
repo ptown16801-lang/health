@@ -37,6 +37,10 @@ conservative, provenance-preserving boundary for future source importers. Its
 controlled synthetic repeat-lab fixture covers exact-file duplicates, same-day
 repeats, conflicts, misleading lookalikes, and reversible manual merges.
 
+The [test APK controls](docs/test-apk-controls.md) add optional screen-capture
+blocking, record unlock, provenance visibility, and validation access. All four
+start off, persist locally, and can be reset together from the home screen.
+
 The [controlled Android acceptance gate](docs/android-acceptance.md) runs the
 integrated candidate across both ingestion paths, the zero-false-merge fixture,
 cross-source search and timeline projections, and an integrity-checked export
