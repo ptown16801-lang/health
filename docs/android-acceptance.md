@@ -15,7 +15,8 @@ size, and SHA-256 digest.
 
 The Android build generates its packaged `controlled-corpus` assets through the
 same OneNote, Jefferson, and normalization functions invoked by the Python gate.
-The instrumentation tests browse that packaged corpus, open OneNote PDF and PGM
+The instrumentation tests explicitly enable provenance/detail visibility and
+validation access (both default off), then reset controls afterward. They browse that packaged corpus, open OneNote PDF and PGM
 visual evidence with visible provenance, render the original synthetic Jefferson
 C-CDA with its source hash, and invoke the on-device compatible export and
 re-import flow before comparing every restored file by path, size, and SHA-256.

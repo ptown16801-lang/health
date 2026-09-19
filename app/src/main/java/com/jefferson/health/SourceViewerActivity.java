@@ -1,6 +1,13 @@
 package com.jefferson.health;
 
 import android.app.Activity;
+import android.app.KeyguardManager;
+import android.content.Intent;
+import android.hardware.biometrics.BiometricPrompt;
+import android.hardware.biometrics.BiometricManager;
+import android.os.Build;
+import android.os.CancellationSignal;
+import android.view.View;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -28,23 +35,162 @@ public final class SourceViewerActivity extends Activity {
     private TextView pageLabel;
     private int pageIndex;
     private float zoom = 1f;
+    private static final int UNLOCK_REQUEST = 1;
+    private TestSettings settings;
+    private boolean authenticated;
+    private boolean attemptedUnlock;
+    private boolean credentialPending;
+    private CancellationSignal biometricCancellation;
+    private LinearLayout content;
 
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
+        settings = new TestSettings(this);
+        settings.applyCapturePolicy(getWindow());
+        // A credential request may outlive activity recreation; never restore an unlock grant.
+        credentialPending = state != null && state.getBoolean("credentialPending");
+        showLocked();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        settings.applyCapturePolicy(getWindow());
+        if (!settings.enabled(TestSettings.Control.REQUIRE_UNLOCK) || authenticated) {
+            showRecord();
+        } else {
+            showLocked();
+            if (!attemptedUnlock && !credentialPending) requestUnlock();
+        }
+    }
+
+    private LinearLayout newContent() {
+        closePdf();
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(24, 24, 24, 24);
+        content = root;
+        setContentView(root);
+        return root;
+    }
+
+    private void showLocked() {
+        LinearLayout root = newContent();
+        TextView locked = new TextView(this);
+        locked.setText("Record locked. Authenticate with your device screen lock to continue.");
+        locked.setContentDescription("Record locked");
+        root.addView(locked);
+        root.addView(button("Unlock record", ignored -> requestUnlock()));
+        root.addView(button("Back to home", ignored -> finish()));
+    }
+
+    private void requestUnlock() {
+        if (credentialPending || biometricCancellation != null) return;
+        attemptedUnlock = true;
+        KeyguardManager keyguard = getSystemService(KeyguardManager.class);
+        if (keyguard == null || !keyguard.isDeviceSecure()) {
+            TextView message = new TextView(this);
+            message.setText("Set a device PIN, pattern, or password in Android settings first, "
+                    + "or turn the gate off on the home screen.");
+            showLocked();
+            content.addView(message);
+            return;
+        }
+        if (Build.VERSION.SDK_INT >= 29
+                && getSystemService(BiometricManager.class).canAuthenticate()
+                == BiometricManager.BIOMETRIC_SUCCESS) {
+            CancellationSignal cancellation = new CancellationSignal();
+            biometricCancellation = cancellation;
+            new BiometricPrompt.Builder(this)
+                    .setTitle("Unlock record")
+                    .setSubtitle("Use biometrics or your device screen lock")
+                    .setNegativeButton("Use device PIN", getMainExecutor(), (dialog, which) -> {
+                        if (biometricCancellation != cancellation || isFinishing()) return;
+                        biometricCancellation = null;
+                        requestDeviceCredential();
+                    })
+                    .build()
+                    .authenticate(cancellation, getMainExecutor(),
+                            new BiometricPrompt.AuthenticationCallback() {
+                                @Override
+                                public void onAuthenticationSucceeded(
+                                        BiometricPrompt.AuthenticationResult result) {
+                                    if (biometricCancellation != cancellation || isFinishing()) return;
+                                    biometricCancellation = null;
+                                    authenticated = true;
+                                    showRecord();
+                                }
+
+                                @Override
+                                public void onAuthenticationError(int code, CharSequence message) {
+                                    if (biometricCancellation != cancellation || isFinishing()) return;
+                                    biometricCancellation = null;
+                                    showLocked();
+                                    if (code != BiometricPrompt.BIOMETRIC_ERROR_CANCELED
+                                            && code != BiometricPrompt.BIOMETRIC_ERROR_USER_CANCELED) {
+                                        requestDeviceCredential();
+                                    }
+                                }
+                            });
+        } else {
+            requestDeviceCredential();
+        }
+    }
+
+    private void requestDeviceCredential() {
+        if (credentialPending || isFinishing()) return;
+        // Also supports API 26–28 and devices without enrolled biometrics.
+        // The app never owns or stores a PIN.
+        KeyguardManager keyguard = getSystemService(KeyguardManager.class);
+        Intent unlock = keyguard.createConfirmDeviceCredentialIntent(
+                "Unlock record", "Confirm your device screen lock to open this record");
+        if (unlock != null) {
+            credentialPending = true;
+            startActivityForResult(unlock, UNLOCK_REQUEST);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int request, int result, Intent data) {
+        super.onActivityResult(request, result, data);
+        if (request == UNLOCK_REQUEST && credentialPending) {
+            credentialPending = false;
+            attemptedUnlock = true;
+            authenticated = result == RESULT_OK;
+            if (!authenticated) finish();
+        }
+    }
+
+    private void showRecord() {
+        // Check again at the rendering boundary, including direct activity launches.
+        if (settings.enabled(TestSettings.Control.REQUIRE_UNLOCK) && !authenticated) return;
+        LinearLayout root = newContent();
         TextView title = new TextView(this);
         title.setText(getIntent().getStringExtra("title"));
         title.setContentDescription("Source title");
         title.setTextSize(22);
         root.addView(title);
-        TextView provenance = new TextView(this);
-        provenance.setText("View source · " + getIntent().getStringExtra("provenance"));
-        provenance.setContentDescription("Source provenance");
-        root.addView(provenance);
-
+        boolean details = settings.enabled(TestSettings.Control.SHOW_DETAILS);
+        if (details) {
+            TextView provenance = new TextView(this);
+            provenance.setText("View source · " + getIntent().getStringExtra("provenance"));
+            provenance.setContentDescription("Source provenance");
+            root.addView(provenance);
+        }
+        String openState = getIntent().getStringExtra("openState");
+        if (openState != null && !SourceRecord.OpenState.READY.name().equals(openState)) {
+            TextView unavailable = new TextView(this);
+            unavailable.setContentDescription("Source unavailable");
+            unavailable.setText(switch (SourceRecord.OpenState.valueOf(openState)) {
+                case CORRUPT -> "The original is corrupt or missing. It was not replaced with extracted text.";
+                case OFFLINE -> "This Drive-backed original is remote-only and unavailable while offline.";
+                case UNSUPPORTED -> "This source format is unsupported. The original remains preserved.";
+                default -> "Source cannot be opened.";
+            });
+            root.addView(unavailable);
+            return;
+        }
         File file = new File(getIntent().getStringExtra("path"));
         SourceRecord.Kind kind = SourceRecord.Kind.valueOf(getIntent().getStringExtra("kind"));
         try {
@@ -55,10 +201,9 @@ public final class SourceViewerActivity extends Activity {
             TextView failure = new TextView(this);
             failure.setContentDescription("Source viewer error");
             failure.setText("Unable to render this source. Original preserved.\n"
-                    + error.getClass().getSimpleName() + ": " + error.getMessage());
+                    + (details ? error.getClass().getSimpleName() + ": " + error.getMessage() : ""));
             root.addView(failure);
         }
-        setContentView(root);
     }
 
     private void showPdf(LinearLayout root, File file) throws IOException {
@@ -140,11 +285,47 @@ public final class SourceViewerActivity extends Activity {
     }
 
     @Override
-    protected void onDestroy() {
-        if (renderer != null) renderer.close();
+    protected void onPause() {
+        // Hide record content before this activity enters the background.
+        if (settings.enabled(TestSettings.Control.REQUIRE_UNLOCK)) content.setVisibility(View.INVISIBLE);
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (!credentialPending) {
+            authenticated = false;
+            attemptedUnlock = false;
+            cancelBiometric();
+        }
+        showLocked();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle state) {
+        state.putBoolean("credentialPending", credentialPending);
+        super.onSaveInstanceState(state);
+    }
+
+    private void cancelBiometric() {
+        CancellationSignal cancellation = biometricCancellation;
+        biometricCancellation = null;
+        if (cancellation != null) cancellation.cancel();
+    }
+
+    private void closePdf() {
+        if (renderer != null) { renderer.close(); renderer = null; }
         if (descriptor != null) {
             try { descriptor.close(); } catch (IOException ignored) { }
+            descriptor = null;
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        cancelBiometric();
+        closePdf();
         super.onDestroy();
     }
 }

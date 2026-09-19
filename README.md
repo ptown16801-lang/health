@@ -27,6 +27,8 @@ The first [Android/local-first source-browser slice](docs/JON-107-android-archit
 builds a debug APK and generates synthetic PDF/image/text sources on-device. Build
 and run its JVM tests with `./gradlew testDebugUnitTest assembleDebug` using Java 17
 and Android SDK 35. It is an implementation baseline, not a medical-data migration.
+To publish a downloadable test build on GitHub, use the explicitly triggered
+[debug APK release workflow](docs/debug-apk-releases.md).
 
 The [OneNote ingestion workflow](docs/onenote-ingestion.md) packages recovered
 native text, images, and original embedded documents for local Android import
@@ -36,6 +38,10 @@ The [record normalization contract](docs/record-normalization.md) defines the
 conservative, provenance-preserving boundary for future source importers. Its
 controlled synthetic repeat-lab fixture covers exact-file duplicates, same-day
 repeats, conflicts, misleading lookalikes, and reversible manual merges.
+
+The [test APK controls](docs/test-apk-controls.md) add optional screen-capture
+blocking, record unlock, provenance visibility, and validation access. All four
+start off, persist locally, and can be reset together from the home screen.
 
 The [controlled Android acceptance gate](docs/android-acceptance.md) runs the
 integrated candidate across both ingestion paths, the zero-false-merge fixture,
