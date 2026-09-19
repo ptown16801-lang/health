@@ -27,6 +27,8 @@ The first [Android/local-first source-browser slice](docs/JON-107-android-archit
 builds a debug APK and generates synthetic PDF/image/text sources on-device. Build
 and run its JVM tests with `./gradlew testDebugUnitTest assembleDebug` using Java 17
 and Android SDK 35. It is an implementation baseline, not a medical-data migration.
+To publish a downloadable test build on GitHub, use the explicitly triggered
+[debug APK release workflow](docs/debug-apk-releases.md).
 
 The [OneNote ingestion workflow](docs/onenote-ingestion.md) packages recovered
 native text, images, and original embedded documents for local Android import

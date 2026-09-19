@@ -1,0 +1,117 @@
+name: Publish debug APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['**']
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    # The marker is an explicit opt-in, including before this workflow is on the default branch.
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[publish-debug-apk]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.11'
+      - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
+      - name: Install Android SDK packages
+        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - name: Test and build debug APKs
+        run: ./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug assembleDebugAndroidTest
+      - name: Prepare APK and checksum
+        run: |
+          mkdir -p release-assets
+          apk="jefferson-health-${GITHUB_SHA::12}-debug.apk"
+          cp app/build/outputs/apk/debug/app-debug.apk "release-assets/$apk"
+          cd release-assets
+          sha256sum "$apk" > "$apk.sha256"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: debug-apk-release
+          path: release-assets/*
+          if-no-files-found: error
+          retention-days: 7
+      - name: Save test and lint reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: debug-apk-reports
+          path: |
+            app/build/reports/
+            app/build/test-results/
+          if-no-files-found: warn
+          retention-days: 7
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Only this job receives a write token; it does not check out or execute app code.
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: debug-apk-release
+          path: release-assets
+      - name: Verify checksum
+        run: |
+          cd release-assets
+          sha256sum --check --strict ./*.sha256
+      - name: Publish GitHub prerelease
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const fs = require('fs');
+            const { owner, repo } = context.repo;
+            const tag = `debug-${context.runId}-${process.env.GITHUB_RUN_ATTEMPT}`;
+            const apk = `jefferson-health-${context.sha.slice(0, 12)}-debug.apk`;
+            const checksum = fs.readFileSync(`release-assets/${apk}.sha256`, 'utf8').trim();
+            const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
+            // Keep incomplete uploads in a draft; expose the release only after both assets arrive.
+            const { data: release } = await github.rest.repos.createRelease({
+              owner, repo, tag_name: tag, target_commitish: context.sha,
+              name: `Android debug APK — ${context.sha.slice(0, 12)}`,
+              draft: true, prerelease: true, make_latest: 'false',
+              body: [
+                `Debug APK built from commit ${context.sha}. Uses packaged synthetic fixtures.`,
+                'For testing only. This APK is debug-signed; a different debug signing key may require uninstalling an older test build (which deletes its local app data).',
+                'Validation: JVM tests, Android lint, debug APK build, and instrumentation APK build. Device tests are not run by this workflow.',
+                `Build: ${runUrl}`,
+                `SHA-256: ${checksum}`,
+              ].join('\n\n'),
+            });
+            const assets = [];
+            for (const name of [apk, `${apk}.sha256`]) {
+              const data = fs.readFileSync(`release-assets/${name}`);
+              const { data: asset } = await github.rest.repos.uploadReleaseAsset({
+                owner, repo, release_id: release.id, name, data,
+                headers: {
+                  'content-type': name.endsWith('.apk') ? 'application/vnd.android.package-archive' : 'text/plain',
+                  'content-length': data.length,
+                },
+              });
+              assets.push(asset);
+            }
+            const { data: published } = await github.rest.repos.updateRelease({
+              owner, repo, release_id: release.id, draft: false, make_latest: 'false',
+            });
+            await core.summary
+              .addLink('GitHub prerelease', published.html_url)
+              .addBreak()
+              .addLink('Download debug APK', assets[0].browser_download_url)
+              .addBreak()
+              .addLink('Download SHA-256 checksum', assets[1].browser_download_url)
+              .write();
