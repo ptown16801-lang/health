@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import android.app.Activity;
 import android.app.Instrumentation;
+import android.content.Intent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -22,6 +23,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 
 @RunWith(AndroidJUnit4.class)
@@ -70,6 +76,30 @@ public final class ControlledCorpusAcceptanceTest {
         assertNotNull("Jefferson source content missing", text);
         assertTrue("Jefferson source content was not rendered",
                 text.getText().toString().contains("<title>Synthetic Patient Summary</title>"));
+        close(viewer, instrumentation);
+    }
+
+    @Test
+    public void corruptImageReportsFailureWithoutChangingOriginal() throws IOException {
+        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+        File corrupt = new File(activity.getActivity().getCacheDir(), "corrupt.synthetic.pgm");
+        byte[] original = "not-an-image\n".getBytes(StandardCharsets.UTF_8);
+        Files.write(corrupt.toPath(), original);
+        Intent intent = new Intent(activity.getActivity(), SourceViewerActivity.class)
+                .putExtra("path", corrupt.getAbsolutePath())
+                .putExtra("kind", SourceRecord.Kind.IMAGE.name())
+                .putExtra("title", "Controlled corrupt image")
+                .putExtra("provenance", "synthetic-corrupt · sha256:test · page 1")
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        Activity viewer = instrumentation.startActivitySync(intent);
+        instrumentation.waitForIdleSync();
+        TextView failure = find(
+                viewer.getWindow().getDecorView(), TextView.class, "Source viewer error");
+        assertNotNull("Undecodable image did not report an error", failure);
+        assertTrue(failure.getText().toString().contains("Original preserved"));
+        assertTrue("Viewer changed the original image bytes",
+                Arrays.equals(original, Files.readAllBytes(corrupt.toPath())));
         close(viewer, instrumentation);
     }
 

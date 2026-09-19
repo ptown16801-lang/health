@@ -15,9 +15,12 @@ size, and SHA-256 digest.
 
 The Android build generates its packaged `controlled-corpus` assets through the
 same OneNote, Jefferson, and normalization functions invoked by the Python gate.
-The instrumentation tests browse that packaged corpus, open OneNote visual
-evidence with visible provenance, and invoke the on-device compatible export and
+The instrumentation tests browse that packaged corpus, open OneNote PDF and PGM
+visual evidence with visible provenance, render the original synthetic Jefferson
+C-CDA with its source hash, and invoke the on-device compatible export and
 re-import flow before comparing every restored file by path, size, and SHA-256.
+They also verify that an undecodable controlled image reports an error while its
+original bytes remain unchanged.
 
 The gate passes only when every reviewed event group is present and there are
 zero false automatic merges. Its JSON output contains counts and statuses only;
