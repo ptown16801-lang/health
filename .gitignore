@@ -1,8 +1,12 @@
 # Private source material. Never commit real validation fixtures.
+.private/
 private/
-fixtures/
 inputs/
-references/
+fixtures/*
+!fixtures/README.md
+!fixtures/*.synthetic.json
+references/*
+!references/README.md
 screenshots/
 *.one
 *.onepkg
@@ -19,14 +23,32 @@ ocr/
 
 # Common recovered document and image formats.
 *.pdf
+*.mht
 *.png
 *.jpg
 *.jpeg
 *.tif
 *.tiff
 
-# Local scratch and environment files.
+# Public synthetic ingestion fixtures are explicitly safe to commit.
+!fixtures/onenote-derived-synthetic/
+!fixtures/onenote-derived-synthetic/**
+
+# Local scratch, environment, and Python files.
 .env
 .env.*
 tmp/
 *.tmp
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+import-output/
+
+# Android/Gradle local and generated files.
+/.gradle/
+/build/
+/app/build/
+/local.properties

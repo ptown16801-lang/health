@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "workspace_is_synthetic_only": true,
+  "events": [
+    {"id": "E1", "source_assertion_ids": ["A1", "A2"], "provenance": [{"assertion_id": "A1", "source": "source-alpha-structured", "source_version": "sha256:alpha-v1"}, {"assertion_id": "A2", "source": "source-beta-document", "source_version": "sha256:beta-v1"}]},
+    {"id": "E2", "source_assertion_ids": ["A3"], "provenance": [{"assertion_id": "A3", "source": "source-alpha-structured", "source_version": "sha256:alpha-v1"}]},
+    {"id": "E3", "source_assertion_ids": ["A4"], "provenance": [{"assertion_id": "A4", "source": "source-alpha-structured", "source_version": "sha256:alpha-v1"}]},
+    {"id": "E4", "source_assertion_ids": ["A5"], "provenance": [{"assertion_id": "A5", "source": "source-alpha-structured", "source_version": "sha256:alpha-v1"}]},
+    {"id": "E5", "source_assertion_ids": ["A6"], "provenance": [{"assertion_id": "A6", "source": "source-alpha-structured", "source_version": "sha256:alpha-v1"}]},
+    {"id": "E6", "source_assertion_ids": ["A7"], "provenance": [{"assertion_id": "A7", "source": "source-beta-ocr", "source_version": "sha256:beta-v1"}]}
+  ],
+  "incorrect_merge_undo": {"pair": ["A3", "A7"], "operations": [{"operation_id": "OP-MERGE-001", "action": "merge", "source_assertion_ids": ["A3", "A7"]}, {"operation_id": "OP-UNDO-001", "action": "undo", "source_assertion_ids": ["A3", "A7"]}], "final_event_ids_by_assertion": {"A3": "E2", "A7": "E6"}},
+  "round_trip": {"schema_version": 1, "reimported_assertions": [
+    {"id": "A1", "source": "source-alpha-structured", "source_version": "sha256:alpha-v1", "analyte": "potassium", "value": 4.1, "unit": "mmol/L", "collected_at": "2030-01-15T08:00:00Z", "specimen": "serum", "panel": "BMP", "accession": "ALPHA-001"},
+    {"id": "A2", "source": "source-beta-document", "source_version": "sha256:beta-v1", "analyte": "potassium", "value": 4.1, "unit": "mmol/L", "collected_at": "2030-01-15T08:00:00Z", "specimen": "serum", "panel": "BMP", "accession": "ALPHA-001"},
+    {"id": "A3", "source": "source-alpha-structured", "source_version": "sha256:alpha-v1", "analyte": "potassium", "value": 4.8, "unit": "mmol/L", "collected_at": "2030-01-15T16:00:00Z", "specimen": "serum", "panel": "BMP", "accession": "ALPHA-002"},
+    {"id": "A4", "source": "source-alpha-structured", "source_version": "sha256:alpha-v1", "analyte": "potassium", "value": 4.1, "unit": "mmol/L", "collected_at": "2030-01-15T16:30:00Z", "specimen": "plasma", "panel": "BMP", "accession": "ALPHA-003"},
+    {"id": "A5", "source": "source-alpha-structured", "source_version": "sha256:alpha-v1", "analyte": "potassium", "value": 4.1, "unit": "mmol/L", "collected_at": "2030-01-15T08:00:00Z", "specimen": "serum", "panel": "CMP", "accession": "ALPHA-004"},
+    {"id": "A6", "source": "source-alpha-structured", "source_version": "sha256:alpha-v1", "analyte": "potassium", "value": 4.1, "unit": "mmol/L", "collected_at": "2030-01-15T12:00:00Z", "specimen": "serum", "panel": "BMP", "accession": "ALPHA-005"},
+    {"id": "A7", "source": "source-beta-ocr", "source_version": "sha256:beta-v1", "analyte": "potassium", "value": 4.7, "unit": "mmol/L", "collected_at": "2030-01-15T16:00:00Z", "specimen": "serum", "panel": "BMP", "accession": "ALPHA-002"}
+  ]},
+  "manual_review": {"timeline_usable": true, "search_usable": true, "export_inspected": true}
+}
