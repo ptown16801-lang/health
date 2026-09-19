@@ -35,10 +35,12 @@ public final class SourceViewerActivity extends Activity {
         root.setPadding(24, 24, 24, 24);
         TextView title = new TextView(this);
         title.setText(getIntent().getStringExtra("title"));
+        title.setContentDescription("Source title");
         title.setTextSize(22);
         root.addView(title);
         TextView provenance = new TextView(this);
         provenance.setText("View source · " + getIntent().getStringExtra("provenance"));
+        provenance.setContentDescription("Source provenance");
         root.addView(provenance);
 
         File file = new File(getIntent().getStringExtra("path"));
@@ -66,6 +68,7 @@ public final class SourceViewerActivity extends Activity {
         controls.addView(previous); controls.addView(next); controls.addView(zoomOut); controls.addView(zoomIn);
         root.addView(controls);
         pageLabel = new TextView(this);
+        pageLabel.setContentDescription("PDF page status");
         root.addView(pageLabel);
         image = new ImageView(this);
         image.setAdjustViewBounds(true);

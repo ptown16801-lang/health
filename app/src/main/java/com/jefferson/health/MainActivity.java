@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -15,6 +16,8 @@ import java.util.List;
 
 public final class MainActivity extends Activity {
     private List<SourceRecord> records;
+    private File corpusRoot;
+    private TextView roundTripStatus;
 
     @Override
     protected void onCreate(Bundle state) {
@@ -28,8 +31,17 @@ public final class MainActivity extends Activity {
         heading.setTextSize(24);
         root.addView(heading);
         TextView scope = new TextView(this);
-        scope.setText("Generated synthetic non-PHI fixtures · works offline");
+        scope.setText("Integrated OneNote + Jefferson synthetic non-PHI corpus · works offline");
         root.addView(scope);
+
+        Button roundTrip = new Button(this);
+        roundTrip.setText("Validate export / re-import");
+        roundTrip.setContentDescription("Validate controlled corpus round trip");
+        roundTrip.setOnClickListener(ignored -> validateRoundTrip());
+        root.addView(roundTrip);
+        roundTripStatus = new TextView(this);
+        roundTripStatus.setContentDescription("Round trip status");
+        root.addView(roundTripStatus);
 
         ListView list = new ListView(this);
         root.addView(list, new LinearLayout.LayoutParams(
@@ -37,7 +49,9 @@ public final class MainActivity extends Activity {
         setContentView(root);
 
         try {
-            records = SyntheticArchive.create(new File(getFilesDir(), "synthetic-archive-v1"));
+            ControlledCorpus.Loaded corpus = ControlledCorpus.load(this);
+            corpusRoot = corpus.root();
+            records = corpus.records();
             String[] labels = records.stream()
                     .map(record -> record.title() + "\n" + record.provenanceLabel()
                             + " · " + record.openState().name().toLowerCase())
@@ -46,6 +60,21 @@ public final class MainActivity extends Activity {
             list.setOnItemClickListener((parent, view, position, id) -> open(records.get(position)));
         } catch (IOException error) {
             showState("Archive unavailable", error.getMessage());
+        }
+    }
+
+    private void validateRoundTrip() {
+        if (corpusRoot == null) {
+            showState("Round trip unavailable", "The controlled corpus has not loaded.");
+            return;
+        }
+        try {
+            int files = ArchiveRoundTrip.validate(corpusRoot, new File(getCacheDir(), "round-trip"));
+            roundTripStatus.setText("Round trip passed · " + files + " files restored byte-for-byte");
+            showState("Round trip passed", files + " corpus files restored byte-for-byte.");
+        } catch (IOException error) {
+            roundTripStatus.setText("Round trip failed · " + error.getMessage());
+            showState("Round trip failed", error.getMessage());
         }
     }
 

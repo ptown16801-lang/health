@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import dataclass
 from datetime import datetime, timezone
 import json
 from pathlib import Path
@@ -19,14 +20,18 @@ ROOT = Path(__file__).resolve().parents[1]
 FIXED_TIME = datetime(2026, 9, 18, tzinfo=timezone.utc)
 
 
-def _event_groups(result: dict) -> set[frozenset[str]]:
-    return {
-        frozenset(assertion["id"] for assertion in event["assertions"])
-        for event in result["events"]
-    }
+@dataclass(frozen=True)
+class ControlledCandidate:
+    root: Path
+    one_output: Path
+    one_manifest: dict
+    jefferson_output: Path
+    jefferson_manifest: dict
+    normalized: dict
 
 
-def run_acceptance(workspace: Path) -> dict[str, object]:
+def build_controlled_candidate(workspace: Path) -> ControlledCandidate:
+    """Build the one shared, synthetic corpus used by every acceptance layer."""
     workspace.mkdir(parents=True, exist_ok=True)
     candidate = workspace / "candidate"
     candidate.mkdir()
@@ -55,6 +60,34 @@ def run_acceptance(workspace: Path) -> dict[str, object]:
     normalized = normalize(repeat_fixture)
     (candidate / "records.json").write_text(
         json.dumps(normalized, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    return ControlledCandidate(
+        candidate,
+        one_output,
+        one_manifest,
+        jefferson_output,
+        jefferson_manifest,
+        normalized,
+    )
+
+
+def _event_groups(result: dict) -> set[frozenset[str]]:
+    return {
+        frozenset(assertion["id"] for assertion in event["assertions"])
+        for event in result["events"]
+    }
+
+
+def run_acceptance(workspace: Path) -> dict[str, object]:
+    controlled = build_controlled_candidate(workspace)
+    candidate = controlled.root
+    one_output = controlled.one_output
+    one_manifest = controlled.one_manifest
+    jefferson_output = controlled.jefferson_output
+    jefferson_manifest = controlled.jefferson_manifest
+    normalized = controlled.normalized
+    repeat_fixture = json.loads(
+        (ROOT / "fixtures/repeat-labs.synthetic.json").read_text(encoding="utf-8")
     )
     expected_groups = {
         frozenset(assertion_ids)
