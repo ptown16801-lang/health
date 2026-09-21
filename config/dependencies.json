@@ -1,0 +1,25 @@
+{
+  "python": {
+    "minimum": "3.11",
+    "tested": "3.12.11"
+  },
+  "packages": [
+    {"name": "annotated-doc", "version": "0.0.5", "license": "MIT", "source": "https://github.com/fastapi/annotated-doc"},
+    {"name": "cffi", "version": "2.1.1", "license": "MIT-0", "source": "https://github.com/python-cffi/cffi"},
+    {"name": "cryptography", "version": "50.0.1", "license": "Apache-2.0 OR BSD-3-Clause", "source": "https://github.com/pyca/cryptography"},
+    {"name": "markdown-it-py", "version": "4.2.0", "license": "MIT", "source": "https://github.com/executablebooks/markdown-it-py"},
+    {"name": "mdurl", "version": "0.1.2", "license": "MIT", "source": "https://github.com/executablebooks/mdurl"},
+    {"name": "onenote-tool", "version": "0.1.5", "license": "MIT", "source": "https://github.com/vanarebane/onenote-tool", "tag_commit": "abd2065c28a2dcfd45edcc944d8be078c313dd02"},
+    {"name": "Pillow", "version": "12.3.0", "license": "MIT-CMU", "source": "https://github.com/python-pillow/Pillow"},
+    {"name": "pycparser", "version": "3.0", "license": "BSD-3-Clause", "source": "https://github.com/eliben/pycparser"},
+    {"name": "Pygments", "version": "2.21.0", "license": "BSD-2-Clause", "source": "https://github.com/pygments/pygments"},
+    {"name": "pyOneNote", "version": "0.0.2", "license": "Apache-2.0", "source": "https://github.com/DissectMalware/pyOneNote"},
+    {"name": "pypdf", "version": "6.19.0", "license": "BSD-3-Clause", "source": "https://github.com/py-pdf/pypdf"},
+    {"name": "rich", "version": "15.0.0", "license": "MIT", "source": "https://github.com/Textualize/rich"},
+    {"name": "shellingham", "version": "1.5.4", "license": "ISC", "source": "https://github.com/sarugaku/shellingham"},
+    {"name": "typer", "version": "0.27.2", "license": "MIT", "source": "https://github.com/fastapi/typer"}
+  ],
+  "optional_tools": [
+    {"name": "Tesseract OCR", "command": "tesseract", "version": "5.5.1", "license": "Apache-2.0", "source": "https://github.com/tesseract-ocr/tesseract", "purpose": "optional OCR comparison only"}
+  ]
+}
