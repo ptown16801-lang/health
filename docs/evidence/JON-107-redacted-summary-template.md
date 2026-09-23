@@ -5,7 +5,7 @@
 - Scope: `not reported`
 - Converter: `onenote-tool==0.1.5` at commit `abd2065c28a2dcfd45edcc944d8be078c313dd02`
 - Parser dependency: `pyOneNote==0.0.2`
-- PDF renderer: `weasyprint==66.0`
+- PDF renderer: `weasyprint==70.0`
 - Tool versions: `not reported`
 - Converter exit status: `NOT_RUN`
 - Command digest: `not reported`
