@@ -30,7 +30,7 @@ if ! "$python_bin" -m venv "$venv_dir"; then
   echo "Python venv support is required. Install the repository-pinned Python with mise or provide PYTHON_BIN." >&2
   exit 1
 fi
-"$venv_dir/bin/python" -m pip install --disable-pip-version-check "$source_dir[cli]" "weasyprint==66.0"
+"$venv_dir/bin/python" -m pip install --disable-pip-version-check "$source_dir[cli]" "weasyprint==70.0"
 
 installed_version=$(
   "$venv_dir/bin/python" -c 'import importlib.metadata; print(importlib.metadata.version("onenote-tool"))'
@@ -49,8 +49,8 @@ if [[ "$parser_version" != "0.0.2" ]]; then
   echo "Refusing installation: expected pyOneNote 0.0.2, got $parser_version" >&2
   exit 1
 fi
-if [[ "$renderer_version" != "66.0" ]]; then
-  echo "Refusing installation: expected weasyprint 66.0, got $renderer_version" >&2
+if [[ "$renderer_version" != "70.0" ]]; then
+  echo "Refusing installation: expected weasyprint 70.0, got $renderer_version" >&2
   exit 1
 fi
 

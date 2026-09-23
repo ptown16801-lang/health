@@ -23,7 +23,7 @@ VERSION = "0.1.5"
 REPOSITORY = "https://github.com/vanarebane/onenote-tool.git"
 COMMIT = "abd2065c28a2dcfd45edcc944d8be078c313dd02"
 PARSER_VERSION = "0.0.2"
-RENDERER_VERSION = "66.0"
+RENDERER_VERSION = "70.0"
 ONE_MAGIC = bytes.fromhex("e4525c7b8cd8a74daeb15378d02996d3")
 
 

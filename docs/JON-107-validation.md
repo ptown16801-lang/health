@@ -12,7 +12,7 @@ The pinned candidate is:
 - package: `onenote-tool==0.1.5`
 - parser dependency: `pyOneNote==0.0.2` (the converter itself requires this
   exact private-internals-compatible version)
-- semantic PDF renderer: `weasyprint==66.0`
+- semantic PDF renderer: `weasyprint==70.0`
 - repository: `https://github.com/vanarebane/onenote-tool.git`
 - commit/tag: `abd2065c28a2dcfd45edcc944d8be078c313dd02` / `0.1.5`
 - installation: `pip install` from a locally cloned, detached, commit-verified source
